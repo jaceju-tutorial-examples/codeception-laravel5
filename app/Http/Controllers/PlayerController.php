@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests;
-use App\Song;
+use App\Repositories\SongRepository;
 use Illuminate\Http\Request;
 
 class PlayerController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, SongRepository $repository)
     {
         $keyword = trim($request->get('q'));
-
-        $songs = Song::query()->where('name', 'LIKE', "%$keyword%")->get();
-
+        $songs = $repository->search($keyword);
         return view('player.index', compact('keyword', 'songs'));
     }
 

@@ -450,3 +450,51 @@ class PlayerController extends Controller
 ```bash
 c run functional
 ```
+
+## Refactoring with repository pattern
+
+[edit] `app/Repositories/SongRepository.php`
+
+```php
+namespace App\Repositories;
+
+use App\Song;
+
+class SongRepository
+{
+    /**
+     * @var Song
+     */
+    private $song;
+
+    function __construct(Song $song)
+    {
+        $this->song = $song;
+    }
+
+    public function search($keyword)
+    {
+        return $this->song->query()->where('name', 'LIKE', "%$keyword%")->get();
+    }
+}
+```
+
+[edit] `app/Http/Controllers/PlayerController.php`
+
+```php
+use App\Repositories\SongRepository;
+
+class PlayerController extends Controller
+{
+    public function index(Request $request, SongRepository $repository)
+    {
+        $keyword = trim($request->get('q'));
+        $songs = $repository->search($keyword);
+        return view('player.index', compact('keyword', 'songs'));
+    }
+}
+```
+
+```bash
+c run functional
+```
