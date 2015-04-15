@@ -68,6 +68,26 @@ modules:
 c build
 ```
 
+```bash
+npm install laravel-elixir-codeception --save-dev
+```
+
+[edit] `gulpfile.js`
+
+```js
+var elixir = require('laravel-elixir');
+require('laravel-elixir-codeception');
+
+elixir(function(mix) {
+    mix.less('app.less')
+        .codeception(null, { testSuite: 'functional' });
+});
+```
+
+```bash
+gulp tdd
+```
+
 ## Spec 說明
 
 預設：曲庫中有 10 首歌
