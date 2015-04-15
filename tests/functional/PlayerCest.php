@@ -1,7 +1,5 @@
 <?php
 
-use App\Song;
-
 class PlayerCest
 {
     public function _before(FunctionalTester $I)
