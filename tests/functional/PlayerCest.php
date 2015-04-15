@@ -13,7 +13,7 @@ class PlayerCest
 
     public function searchInvalidSongs(FunctionalTester $I)
     {
-        $I->am('a guest');
+        $I->am('guest');
         $I->wantTo('search invalid songs');
 
         $I->searchSongWithKeyword('foo');
