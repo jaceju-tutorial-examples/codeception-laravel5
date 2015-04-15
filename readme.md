@@ -1,4 +1,4 @@
-# Blog Example for Codeception Learning
+# Simple example for Laravel5 development with Codeception
 
 ## Create project
 
