@@ -533,3 +533,12 @@ class PlayerController extends Controller
 ```bash
 c run functional
 ```
+
+## Real testing
+
+```bash
+php artisan db:seed
+```
+
+[browse] `http://localhost:8000/player`
+
