@@ -18,7 +18,8 @@ cd player
         "phpunit/phpunit": "~4.0",
         "phpspec/phpspec": "~2.1",
         "codeception/codeception": "~2.0.12",
-        "laracasts/testdummy": "~2.0"
+        "laracasts/testdummy": "~2.0",
+        "laracasts/generators": "~1.1"
     },
 ```
 
@@ -42,6 +43,19 @@ composer update
 
     'Form'      => 'Illuminate\Html\FormFacade',
 ],
+```
+
+[edit] `app/Providers/AppServiceProvider.php`
+
+```php
+    public function register()
+    {
+        if ($this->app->environment() == 'local') {
+            $this->app->register('Laracasts\Generators\GeneratorsServiceProvider');
+        }
+
+        // ... original code ...
+    }
 ```
 
 ## Codeception setup
@@ -348,6 +362,38 @@ sqlite> .exit
 
 ## Initialize testing data
 
+```bash
+php artisan make:seed Song
+```
+
+[edit] `database/seeds/SongTableSeeder.php`
+
+```php
+    public function run()
+    {
+        DB::table('songs')->truncate();
+        $names = ['Baz', 'Qoo'];
+        foreach (range(1, 10) as $j) {
+            $name = in_array($j, [1, 4, 7])
+                ? 'Bar'
+                : $names[ array_rand($names) ];
+            $name .= " $j";
+            DB::table('songs')->insert(['name' => $name]);
+        }
+    }
+```
+
+[edit] `database/seeds/DatabaseSeeder.php`
+
+```php
+    public function run()
+    {
+        Model::unguard();
+
+        $this->call('SongTableSeeder');
+    }
+```
+
 [edit] `tests/functional/PlayerCest.php`
 
 ```php
@@ -359,16 +405,11 @@ sqlite> .exit
         $I->seeRecord('songs', ['name' => 'Bar 7']);
     }
 
-    protected function seedTestingData()
+    protected function seedTestingData(FunctionalTester $I)
     {
-        $names = ['Foo', 'Baz', 'Qoo'];
-        foreach (range(1, 10) as $j) {
-            $name = in_array($j, [1, 4, 7])
-                ? 'Bar'
-                : $names[array_rand($names)];
-            $name .= " $j";
-            Song::create(['name' => $name]);
-        }
+        $app = $I->getApplication();
+        $seeder = $app->make('DatabaseSeeder');
+        $seeder->run();
     }
 ```
 

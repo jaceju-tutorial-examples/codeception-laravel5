@@ -6,22 +6,17 @@ class PlayerCest
 {
     public function _before(FunctionalTester $I)
     {
-        $this->seedTestingData();
+        $this->seedTestingData($I);
         $I->seeRecord('songs', ['name' => 'Bar 1']);
         $I->seeRecord('songs', ['name' => 'Bar 4']);
         $I->seeRecord('songs', ['name' => 'Bar 7']);
     }
 
-    protected function seedTestingData()
+    protected function seedTestingData(FunctionalTester $I)
     {
-        $names = ['Baz', 'Qoo'];
-        foreach (range(1, 10) as $j) {
-            $name = in_array($j, [1, 4, 7])
-                ? 'Bar'
-                : $names[array_rand($names)];
-            $name .= " $j";
-            Song::create(['name' => $name]);
-        }
+        $app = $I->getApplication();
+        $seeder = $app->make('DatabaseSeeder');
+        $seeder->run();
     }
 
     public function _after(FunctionalTester $I)
