@@ -37,4 +37,16 @@ class PlayerCest
 
         $I->see('沒有找到任何歌曲');
     }
+
+    public function searchValidSongs(FunctionalTester $I)
+    {
+        $I->am('guest');
+        $I->wantTo('search valid songs');
+
+        $I->searchSongWithKeyword('bar');
+
+        $I->see('Bar 1');
+        $I->see('Bar 4');
+        $I->see('Bar 7');
+    }
 }

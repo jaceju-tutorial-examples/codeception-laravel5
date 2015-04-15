@@ -11,8 +11,14 @@
     <input type="submit" value="Search"/>
 {!! Form::close() !!}
 
-@if (!empty($keyword))
+@if (!empty($keyword) && 0 === count($songs))
 <p>沒有找到任何歌曲</p>
+@else
+    <ul>
+    @foreach ($songs as $song)
+        <li>{{ $song->name }}</li>
+    @endforeach
+    </ul>
 @endif
 </body>
 </html>
