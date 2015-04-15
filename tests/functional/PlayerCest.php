@@ -16,14 +16,8 @@ class PlayerCest
         $I->am('a guest');
         $I->wantTo('search invalid songs');
 
-        $I->amOnPage('/player');
-        $I->dontSee('沒有找到任何歌曲');
+        $I->searchSongWithKeyword('foo');
 
-        $I->fillField('Search:', 'foo');
-        $I->click('Search');
-
-        $I->seeCurrentUrlEquals('/player?q=foo');
         $I->see('沒有找到任何歌曲');
-        $I->seeInField('Search:', 'foo');
     }
 }
