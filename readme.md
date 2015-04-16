@@ -1,23 +1,20 @@
 # Laravel5 development with Codeception
 
-如何將 Codeception 整合至 Laravel 5 中
+如何將 Codeception 整合至 Laravel 5 中。
 
 ## 專案說明
 
-* 主要功能為音樂播放器
-* 搜尋歌曲後可以將歌曲放到播放清單
-* 可以設定播放清單內的全部歌曲為已播放
-* 可以對歌曲加 1~5 顆星
+歌曲搜尋器
 
 ## 建立 Laravel 5 專案
 
 ```bash
 composer global require "laravel/installer=~1.2"
-laravel new player
-cd player
+laravel new music-searcher
+cd music-searcher
 ```
 
-編輯 `composer.json`
+編輯 `composer.json` ：
 
 ```json
     "require": {
@@ -42,7 +39,7 @@ composer update
 
 ## 套件設定
 
-編輯 `config/app.php`
+編輯 `config/app.php` ：
 
 ```php
 'providers' => [
@@ -58,7 +55,7 @@ composer update
 
 * 將原來的 `Form` 類別加入支援
 
-編輯 `app/Providers/AppServiceProvider.php`
+編輯 `app/Providers/AppServiceProvider.php` ：
 
 ```php
     public function register()
@@ -87,7 +84,7 @@ c bootstrap
 
 * `bootstrap` 會建立 `tests` 資料夾及必要的測試設定檔與類別檔
 
-編輯 `tests/functional.suite.yml`
+編輯 `tests/functional.suite.yml` ：
 
 加入 `Laravel5` 模組
 
@@ -107,7 +104,7 @@ c build
 npm install laravel-elixir-codeception --save-dev
 ```
 
-編輯 `gulpfile.js`
+編輯 `gulpfile.js` ：
 
 ```js
 var elixir = require('laravel-elixir');
@@ -147,7 +144,7 @@ gulp tdd
 c generate:cest functional Player
 ```
 
-編輯 `tests/PlayerCest.php`
+編輯 `tests/PlayerCest.php` ：
 
 ```php
 class PlayerCest
@@ -186,7 +183,7 @@ c run functional
 * 不需要啟動測試用的伺服器，測試執行於 Codeception 的 process 中
 * Codeception 會建立 Laravel 5 的 Application 來模擬 request 和 response
 
-編輯 `app/Http/routes.php`
+編輯 `app/Http/routes.php` ：
 
 ```php
 Route::get('player', [
@@ -201,7 +198,7 @@ Route::get('player', [
 php artisan make:controller --plain PlayerController
 ```
 
-編輯 `app/Http/Controllers/PlayerController.php`
+編輯 `app/Http/Controllers/PlayerController.php` ：
 
 ```php
 namespace App\Http\Controllers;
@@ -219,7 +216,7 @@ class PlayerController extends Controller
 
 * 基本的 controller 寫法
 
-編輯 `resources/views/player/index.blade.php`
+編輯 `resources/views/player/index.blade.php` ：
 
 ```php
 <!doctype html>
@@ -244,16 +241,16 @@ class PlayerController extends Controller
 c run functional
 ```
 
-編輯 `tests/PlayerCest.php`
+編輯 `tests/PlayerCest.php` ：
 
 ```
 $I->amOnPage('/player');
 $I->dontSee('沒有找到任何歌曲');
 ```
 
-* 該進入播放器頁面時，預設不應該出現「沒有找到任何歌曲」
+* 該進入搜尋器頁面時，預設不應該出現「沒有找到任何歌曲」
 
-編輯 `app/Http/Controllers/PlayerController.php`
+編輯 `app/Http/Controllers/PlayerController.php` ：
 
 ```php
     public function index(Request $request)
@@ -263,7 +260,7 @@ $I->dontSee('沒有找到任何歌曲');
     }
 ```
 
-編輯 `resources/views/player/index.blade.php`
+編輯 `resources/views/player/index.blade.php` ：
 
 ```
 @if (!empty($keyword))
@@ -277,7 +274,7 @@ $I->dontSee('沒有找到任何歌曲');
 c run functional
 ```
 
-編輯 `tests/PlayerCest.php`
+編輯 `tests/PlayerCest.php` ：
 
 ```
 $I->see('沒有找到任何歌曲');
@@ -286,7 +283,7 @@ $I->seeInField('Search:', 'foo');
 
 * 輸入欄位應該保留原輸入值
 
-編輯 `resources/views/player/index.blade.php`
+編輯 `resources/views/player/index.blade.php` ：
 
 ```
 <input type="text" name="q" id="search" value="{{ @$keyword }}"/>
@@ -298,7 +295,7 @@ c run functional
 
 ## 重構代碼
 
-編輯 `tests/_support/FunctionalHelper.php`
+編輯 `tests/_support/FunctionalHelper.php` ：
 
 ```php
 class FunctionalHelper extends \Codeception\Module
@@ -329,7 +326,7 @@ c build
 
 * 要記得重新 `build`
 
-編輯 `tests/functional/PlayerCest.php`
+編輯 `tests/functional/PlayerCest.php` ：
 
 ```php
     public function searchInvalidSongs(FunctionalTester $I)
@@ -353,7 +350,7 @@ c run functional
 
 * 以 sqlite 做為測試用資料庫
 
-編輯 `config/database.php`
+編輯 `config/database.php` ：
 
 ```php
     'default' => 'sqlite',
@@ -369,7 +366,7 @@ php artisan make:model Song
 
 * 建立 model 時，會順便建立 migration
 
-編輯 `app/Song.php`
+編輯 `app/Song.php` ：
 
 ```php
 namespace App;
@@ -389,7 +386,7 @@ class Song extends Model
 * 在 `create` 時會需要 `fillable`
 * 暫時不需要 `timestamps`
 
-編輯 `database/migrations/2015_04_15_091522_create_songs_table.php`
+編輯 `database/migrations/2015_04_15_091522_create_songs_table.php` ：
 
 ```php
     public function up()
@@ -426,7 +423,7 @@ sqlite> .exit
 php artisan make:seed Song
 ```
 
-編輯 `database/seeds/SongTableSeeder.php`
+編輯 `database/seeds/SongTableSeeder.php` ：
 
 ```php
     public function run()
@@ -445,7 +442,7 @@ php artisan make:seed Song
 
 * 除指定的資料列外，其他列為隨時名稱
 
-編輯 `database/seeds/DatabaseSeeder.php`
+編輯 `database/seeds/DatabaseSeeder.php` ：
 
 ```php
     public function run()
@@ -458,7 +455,7 @@ php artisan make:seed Song
 
 * 透過 `DatabaseSeeder` 類別來呼叫新建立的 `SongTableSeeder`
 
-編輯 `tests/functional/PlayerCest.php`
+編輯 `tests/functional/PlayerCest.php` ：
 
 ```php
     public function _before(FunctionalTester $I)
@@ -497,7 +494,7 @@ sqlite> .exit
 
 ## 規格二：搜尋出有效的歌曲
 
-編輯 `tests/functional/PlayerCest.php`
+編輯 `tests/functional/PlayerCest.php` ：
 
 ```php
     public function searchValidSongs(FunctionalTester $I)
@@ -517,7 +514,7 @@ sqlite> .exit
 c run functional
 ```
 
-編輯 `app/Http/Controllers/PlayerController.php`
+編輯 `app/Http/Controllers/PlayerController.php` ：
 
 ```php
 use App\Song;
@@ -537,7 +534,7 @@ class PlayerController extends Controller
 
 * 簡單地利用 `LIKE` 來做搜尋
 
-編輯 `resources/views/player/index.blade.php`
+編輯 `resources/views/player/index.blade.php` ：
 
 ```php
 @if (!empty($keyword) && 0 === count($songs))
@@ -557,7 +554,7 @@ c run functional
 
 ## 用 repository pattern 來重構
 
-編輯 `app/Repositories/SongRepository.php`
+編輯 `app/Repositories/SongRepository.php` ：
 
 ```php
 namespace App\Repositories;
@@ -583,7 +580,7 @@ class SongRepository
 }
 ```
 
-編輯 `app/Http/Controllers/PlayerController.php`
+編輯 `app/Http/Controllers/PlayerController.php` ：
 
 ```php
 use App\Repositories\SongRepository;
