@@ -1,13 +1,23 @@
-# Simple example for Laravel5 development with Codeception
+# Laravel5 development with Codeception
 
-## Create project
+如何將 Codeception 整合至 Laravel 5 中
+
+## 專案說明
+
+* 主要功能為音樂播放器
+* 搜尋歌曲後可以將歌曲放到播放清單
+* 可以設定播放清單內的全部歌曲為已播放
+* 可以對歌曲加 1~5 顆星
+
+## 建立 Laravel 5 專案
 
 ```bash
+composer global require "laravel/installer=~1.2"
 laravel new player
 cd player
 ```
 
-[edit] `composer.json`
+編輯 `composer.json`
 
 ```json
     "require": {
@@ -18,20 +28,21 @@ cd player
         "phpunit/phpunit": "~4.0",
         "phpspec/phpspec": "~2.1",
         "codeception/codeception": "~2.0.12",
-        "laracasts/testdummy": "~2.0",
         "laracasts/generators": "~1.1"
     },
 ```
 
-Note： 2.0.11+ Support Laravel5
+* Laravel 5 預設不再加入 `illuminate\html` 套件
+* Codeception 2.0.11 開始支援 Laravel5
+* Generator 用來加強 artisan 在建立骨架檔案上的功能
 
 ```bash
 composer update
 ```
 
-## Package setup
+## 套件設定
 
-[edit] `config/app.php`
+編輯 `config/app.php`
 
 ```php
 'providers' => [
@@ -41,11 +52,13 @@ composer update
 
 'aliases' => [
 
-    'Form'      => 'Illuminate\Html\FormFacade',
+    'Form' => 'Illuminate\Html\FormFacade',
 ],
 ```
 
-[edit] `app/Providers/AppServiceProvider.php`
+* 將原來的 `Form` 類別加入支援
+
+編輯 `app/Providers/AppServiceProvider.php`
 
 ```php
     public function register()
@@ -58,19 +71,25 @@ composer update
     }
 ```
 
-## Codeception setup
+* 讓 generators 只在 local 開發環境有作用
+
+## 設定 Codeception
 
 ```bash
 alias c=./vendor/bin/codecept
 ```
 
+* 方便後續指令操作
+
 ```bash
 c bootstrap
 ```
 
-[edit] `tests/functional.suite.yml`
+* `bootstrap` 會建立 `tests` 資料夾及必要的測試設定檔與類別檔
 
-Add Laravel5 module
+編輯 `tests/functional.suite.yml`
+
+加入 `Laravel5` 模組
 
 ```yaml
 class_name: FunctionalTester
@@ -82,11 +101,13 @@ modules:
 c build
 ```
 
+* 每次新增模組後都要重新 `build`
+
 ```bash
 npm install laravel-elixir-codeception --save-dev
 ```
 
-[edit] `gulpfile.js`
+編輯 `gulpfile.js`
 
 ```js
 var elixir = require('laravel-elixir');
@@ -98,31 +119,35 @@ elixir(function(mix) {
 });
 ```
 
+* 利用 Laravel 5 的 elixir 來做自動測試，就不需要一再輸入執行的指令
+
 ```bash
 gulp tdd
 ```
+
+* gulp 會監控規格檔案或主要 PHP 檔案是否有修改，如果有就會執行 Codeception 的測試
 
 ## Spec 說明
 
 預設：曲庫中有 10 首歌
 
-Spec 1: 搜尋歌曲，沒有任何歌曲
+規格一：搜尋歌曲，沒有任何歌曲
 
 1. 在上方「搜尋列」搜尋 `foo` ，沒有任何符合的歌曲
 2. 頁面出現「沒有找到任何歌曲」
 
-Spec 2: 搜尋出有效的歌曲
+規格二：搜尋出有效的歌曲
 
 1. 在上方「搜尋列」搜尋 `bar` ，可以搜尋出 3 首歌曲
 2. 頁面出現 3 首歌曲的基本資訊 (曲名)
 
-## Create first spec
+## 規格一：搜尋歌曲，沒有任何歌曲
 
 ```bash
 c generate:cest functional Player
 ```
 
-[edit] `tests/PlayerCest.php`
+編輯 `tests/PlayerCest.php`
 
 ```php
 class PlayerCest
@@ -152,11 +177,16 @@ class PlayerCest
 }
 ```
 
+* 將上述規格先轉換成 Codeception 的程式碼
+
 ```bash
 c run functional
 ```
 
-[edit] `app/Http/routes.php`
+* 不需要啟動測試用的伺服器，測試執行於 Codeception 的 process 中
+* Codeception 會建立 Laravel 5 的 Application 來模擬 request 和 response
+
+編輯 `app/Http/routes.php`
 
 ```php
 Route::get('player', [
@@ -165,11 +195,13 @@ Route::get('player', [
 ]);
 ```
 
+* 暫時不管預設的功能，加入新的 route
+
 ```bash
 php artisan make:controller --plain PlayerController
 ```
 
-[edit] `app/Http/Controllers/PlayerController.php`
+編輯 `app/Http/Controllers/PlayerController.php`
 
 ```php
 namespace App\Http\Controllers;
@@ -185,7 +217,9 @@ class PlayerController extends Controller
 }
 ```
 
-[edit] `resources/views/player/index.blade.php`
+* 基本的 controller 寫法
+
+編輯 `resources/views/player/index.blade.php`
 
 ```php
 <!doctype html>
@@ -204,18 +238,22 @@ class PlayerController extends Controller
 </html>
 ```
 
+* 建立搜尋表單，使用 GET 方法
+
 ```bash
 c run functional
 ```
 
-[edit] `tests/PlayerCest.php`
+編輯 `tests/PlayerCest.php`
 
 ```
 $I->amOnPage('/player');
 $I->dontSee('沒有找到任何歌曲');
 ```
 
-[edit] `app/Http/Controllers/PlayerController.php`
+* 該進入播放器頁面時，預設不應該出現「沒有找到任何歌曲」
+
+編輯 `app/Http/Controllers/PlayerController.php`
 
 ```php
     public function index(Request $request)
@@ -225,7 +263,7 @@ $I->dontSee('沒有找到任何歌曲');
     }
 ```
 
-[edit] `resources/views/player/index.blade.php`
+編輯 `resources/views/player/index.blade.php`
 
 ```
 @if (!empty($keyword))
@@ -233,18 +271,22 @@ $I->dontSee('沒有找到任何歌曲');
 @endif
 ```
 
+* 判斷是否有輸入關鍵字來決定是否顯示「沒有找到任何歌曲」
+
 ```bash
 c run functional
 ```
 
-[edit] `tests/PlayerCest.php`
+編輯 `tests/PlayerCest.php`
 
 ```
 $I->see('沒有找到任何歌曲');
 $I->seeInField('Search:', 'foo');
 ```
 
-[edit] `resources/views/player/index.blade.php`
+* 輸入欄位應該保留原輸入值
+
+編輯 `resources/views/player/index.blade.php`
 
 ```
 <input type="text" name="q" id="search" value="{{ @$keyword }}"/>
@@ -254,9 +296,9 @@ $I->seeInField('Search:', 'foo');
 c run functional
 ```
 
-## Refactor
+## 重構代碼
 
-[edit] `tests/_support/FunctionalHelper.php`
+編輯 `tests/_support/FunctionalHelper.php`
 
 ```php
 class FunctionalHelper extends \Codeception\Module
@@ -278,11 +320,16 @@ class FunctionalHelper extends \Codeception\Module
 }
 ```
 
+* 將 `tests/functional/PlayerCest.php` 中可獨立之搜尋程式碼片段，加到 `FunctionalHelper` 的 `searchSongWithKeyword` 方法
+* 在 helper 中可以用 `$I = $this->getModule('Laravel5');` 來取得 tester
+
 ```bash
 c build
 ```
 
-[edit] `tests/functional/PlayerCest.php`
+* 要記得重新 `build`
+
+編輯 `tests/functional/PlayerCest.php`
 
 ```php
     public function searchInvalidSongs(FunctionalTester $I)
@@ -296,13 +343,17 @@ c build
     }
 ```
 
+* 以 tester 的 `searchSongWithKeyword` 方法取代原來的搜尋片段
+
 ```bash
 c run functional
 ```
 
-## Database setup
+## 資料庫設定
 
-[edit] `config/database.php`
+* 以 sqlite 做為測試用資料庫
+
+編輯 `config/database.php`
 
 ```php
     'default' => 'sqlite',
@@ -316,7 +367,9 @@ touch storage/database.sqlite
 php artisan make:model Song
 ```
 
-[edit] `app/Song.php`
+* 建立 model 時，會順便建立 migration
+
+編輯 `app/Song.php`
 
 ```php
 namespace App;
@@ -333,7 +386,10 @@ class Song extends Model
 }
 ```
 
-[edit] `database/migrations/2015_04_15_091522_create_songs_table.php`
+* 在 `create` 時會需要 `fillable`
+* 暫時不需要 `timestamps`
+
+編輯 `database/migrations/2015_04_15_091522_create_songs_table.php`
 
 ```php
     public function up()
@@ -346,9 +402,13 @@ class Song extends Model
     }
 ```
 
+* 只新增 `name` 欄位
+
 ```bash
 php artisan migrate
 ```
+
+* 查看 sqlite 中是否有建立 tables
 
 ```bash
 sqlite3 storage/database.sqlite
@@ -360,13 +420,13 @@ migrations       password_resets  songs            users
 sqlite> .exit
 ```
 
-## Initialize testing data
+## 初始化測試資料
 
 ```bash
 php artisan make:seed Song
 ```
 
-[edit] `database/seeds/SongTableSeeder.php`
+編輯 `database/seeds/SongTableSeeder.php`
 
 ```php
     public function run()
@@ -383,7 +443,9 @@ php artisan make:seed Song
     }
 ```
 
-[edit] `database/seeds/DatabaseSeeder.php`
+* 除指定的資料列外，其他列為隨時名稱
+
+編輯 `database/seeds/DatabaseSeeder.php`
 
 ```php
     public function run()
@@ -394,7 +456,9 @@ php artisan make:seed Song
     }
 ```
 
-[edit] `tests/functional/PlayerCest.php`
+* 透過 `DatabaseSeeder` 類別來呼叫新建立的 `SongTableSeeder`
+
+編輯 `tests/functional/PlayerCest.php`
 
 ```php
     public function _before(FunctionalTester $I)
@@ -413,11 +477,11 @@ php artisan make:seed Song
     }
 ```
 
+* 透過 Application 物件來建立 `DatabaseSeeder` ，解決相依問題
+
 ```bash
 c run functional
 ```
-
-Note: transaction / rollback in Laravel5 module
 
 ```bash
 sqlite3 storage/database.sqlite
@@ -428,9 +492,12 @@ sqlite> select * from songs;
 sqlite> .exit
 ```
 
-## Search song in database
+* 因為是在 Codeception 的 process 中執行 Laravel 5 模組
+* 所以利用了 transaction / rollback 避免測試資料寫入資料庫中
 
-[edit] `tests/functional/PlayerCest.php`
+## 規格二：搜尋出有效的歌曲
+
+編輯 `tests/functional/PlayerCest.php`
 
 ```php
     public function searchValidSongs(FunctionalTester $I)
@@ -450,7 +517,7 @@ sqlite> .exit
 c run functional
 ```
 
-[edit] `app/Http/Controllers/PlayerController.php`
+編輯 `app/Http/Controllers/PlayerController.php`
 
 ```php
 use App\Song;
@@ -468,7 +535,9 @@ class PlayerController extends Controller
 }
 ```
 
-[edit] `resources/views/player/index.blade.php`
+* 簡單地利用 `LIKE` 來做搜尋
+
+編輯 `resources/views/player/index.blade.php`
 
 ```php
 @if (!empty($keyword) && 0 === count($songs))
@@ -486,9 +555,9 @@ class PlayerController extends Controller
 c run functional
 ```
 
-## Refactoring with repository pattern
+## 用 repository pattern 來重構
 
-[edit] `app/Repositories/SongRepository.php`
+編輯 `app/Repositories/SongRepository.php`
 
 ```php
 namespace App\Repositories;
@@ -514,7 +583,7 @@ class SongRepository
 }
 ```
 
-[edit] `app/Http/Controllers/PlayerController.php`
+編輯 `app/Http/Controllers/PlayerController.php`
 
 ```php
 use App\Repositories\SongRepository;
@@ -534,7 +603,7 @@ class PlayerController extends Controller
 c run functional
 ```
 
-## Real testing
+## 在瀏覽器上實測
 
 ```bash
 php artisan db:seed
